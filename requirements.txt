@@ -1,0 +1,7 @@
+google-cloud-storage
+Flask==2.3.3
+requests==2.31.0
+debugpy # Required for debugging.
+numpy==1.26.1
+opencv-python-headless==4.8.0.74
+roboflow==1.1.7
