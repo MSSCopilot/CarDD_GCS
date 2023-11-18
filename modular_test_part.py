@@ -130,23 +130,28 @@ def run_models_parallel(image_path, confidence=20, file_name='prediction.jpg',mo
         add_prediction = True
         for existing_prediction in non_overlapping_predictions:
             overlap_percentage = calculate_overlap(prediction['points'], existing_prediction['points'])
-            print(f"OVERLAP PERCENTAGE FOR {prediction['class']} and {existing_prediction['class']} is {overlap_percentage}")
+            # print(f"OVERLAP PERCENTAGE FOR {prediction['class']} and {existing_prediction['class']} is {overlap_percentage}")
 
-            if overlap_percentage > 0.8:
-                # Compare confidences and choose the prediction with higher confidence
-                if prediction['confidence'] > existing_prediction['confidence']:
-                    print(f"adding {prediction['class']} with conf={prediction['confidence']} instead of {existing_prediction['class']} with conf={existing_prediction['confidence']}")
-                    non_overlapping_predictions.remove(existing_prediction)
-                    non_overlapping_predictions.append(prediction)
-                add_prediction = False
-                break
+            if overlap_percentage > 0.5:
+                print(f"OVERLAP PERCENTAGE FOR {prediction['class']} and {existing_prediction['class']} is {overlap_percentage}")
+                # reverse check the overlap
+                rev_overlap_percentage = calculate_overlap(existing_prediction['points'], prediction['points'])
+                if rev_overlap_percentage > 0.5:
+                    print(f"REVERSE OVERLAP PERCENTAGE FOR {prediction['class']} and {existing_prediction['class']} is {rev_overlap_percentage}")
+                    # Compare confidences and choose the prediction with higher confidence
+                    if prediction['confidence'] > existing_prediction['confidence']:
+                        print(f"adding {prediction['class']} with conf={prediction['confidence']} instead of {existing_prediction['class']} with conf={existing_prediction['confidence']}")
+                        non_overlapping_predictions.remove(existing_prediction)
+                        non_overlapping_predictions.append(prediction)
+                    add_prediction = False
+                    break
         if add_prediction:
             print(f"adding {prediction['class'] } as no overlap")
             non_overlapping_predictions.append(prediction)
 
     combined_output = {'predictions': non_overlapping_predictions}
     annotated_image = draw_annotations(image_path, combined_output)
-    return annotated_image, time_taken_models
+    return annotated_image, time_taken_models, combined_output
 
 def run_model(image_path, confidence, model_name):
     rf = Roboflow(api_key="L50aJwNZ3zWDrgp1VYCT")
@@ -191,7 +196,7 @@ def calculate_overlap(points1, points2):
     area1 = polygon1.area
     area2 = polygon2.area
 
-    overlap_percentage = overlap_area / min(area1, area2)
+    overlap_percentage = overlap_area / area1
     return overlap_percentage
 
 def draw_annotations(image_path, predictions):
@@ -255,18 +260,17 @@ def annotate_image():
     image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
     cv2.imwrite('input_part.jpg', image)
 
-    annotated_image,time_taken_models = run_models_parallel('input_part.jpg',file_name=file_name)
+    annotated_image,time_taken_models,combined_outputs = run_models_parallel('input_part.jpg',file_name=file_name)
     print('ANNOTATED SUCCESSFULLY')
-    output_location = "predictions_part\\"+file_name
+    output_location = 'output'+file_name
     cv2.imwrite(output_location, annotated_image)
     
     # Convert annotated image to base64
-    final_image = cv2.imread(output_location)
-    # media_link = upload_blob(source_file_name=output_location)
-    media_link = ' '
+    media_link = upload_blob(source_file_name=output_location)
     time_end=time.time()
     time_taken=time_end-time_start
-    return jsonify({'media_link': media_link, 'total_time_taken': time_taken, 'time_taken_models': time_taken_models})
+
+    return jsonify({'media_link': media_link, 'total_time_taken': time_taken, 'time_taken_models': time_taken_models, 'Parts List with points': combined_outputs})
 
 if __name__ == '__main__':
     server_port = os.environ.get('PORT', '8080')

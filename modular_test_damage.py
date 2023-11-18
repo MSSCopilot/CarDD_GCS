@@ -150,7 +150,7 @@ def run_models_parallel(image_path, confidence=30, file_name='prediction.jpg',mo
 
     combined_output = {'predictions': non_overlapping_predictions}
     annotated_image = draw_annotations(image_path, combined_output)
-    return annotated_image, time_taken_models
+    return annotated_image, time_taken_models, combined_output
 
 def run_model(image_path, confidence, model_name):
     rf = Roboflow(api_key="ETNCflOTQ7YT4rJu89R9")
@@ -263,18 +263,16 @@ def annotate_image():
     image = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
     cv2.imwrite('input_damage.jpg', image)
 
-    annotated_image,time_taken_models = run_models_parallel('input_damage.jpg',file_name=file_name)
+    annotated_image,time_taken_models,combined_outputs = run_models_parallel('input_damage.jpg',file_name=file_name)
     print('ANNOTATED SUCCESSFULLY')
-    output_location = "predictions_damage\\"+file_name
+    output_location = 'output'+file_name
     cv2.imwrite(output_location, annotated_image)
     
     # Convert annotated image to base64
-    final_image = cv2.imread(output_location)
-    # media_link = upload_blob(source_file_name=output_location)
-    media_link = ' '
+    media_link = upload_blob(source_file_name=output_location)
     time_end=time.time()
     time_taken=time_end-time_start
-    return jsonify({'media_link': media_link, 'total_time_taken': time_taken, 'time_taken_models': time_taken_models})
+    return jsonify({'media_link': media_link, 'total_time_taken': time_taken, 'time_taken_models': time_taken_models, 'Damage List with points': combined_outputs})
 
 if __name__ == '__main__':
     server_port = os.environ.get('PORT', '5000')
