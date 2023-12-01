@@ -154,7 +154,7 @@ def run_models_parallel(image_path, confidence=20, file_name='prediction.jpg',mo
     return annotated_image, time_taken_models, combined_output
 
 def run_model(image_path, confidence, model_name):
-    rf = Roboflow(api_key="L50aJwNZ3zWDrgp1VYCT")
+    rf = Roboflow(api_key="ETNCflOTQ7YT4rJu89R9")
     project = rf.workspace().project(model_name)
     model = project.version(1).model
 
