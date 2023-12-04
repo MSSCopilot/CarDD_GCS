@@ -124,6 +124,67 @@ def run_models_parallel(image_path, confidence=20, file_name='prediction.jpg',mo
     img = annotate_model_colors(img, outputs, model_names)
     cv2.imwrite("predictions_part\\no_check\\" + file_name, img)
 
+    def standard_names():
+        bonnet = ['bonnet', 'hood', 'Hood']
+        windscreen = ['front_glass', 'Windshield', 'Windshield']
+        front_bumper = ['front_bumper', 'Frontbumper', 'Front-bumper']
+        head_light = ['front_light', 'Headlights', 'Headlight']
+        rear_bumper = ['back_bumper', 'Rearbumper', 'Back-bumper']
+        rear_light = ['back_light', 'Rearlamp', 'Tail-light']
+        rear_windscreen = ['back_glass', 'Back-windshield']
+        front_door = ['front_door', 'Frontdoor', 'Front-door']
+        rear_door = ['back_door', 'Reardoor', 'Back-door']
+        front_fender = ['Frontfender', 'Fender']
+        rear_fender = ['Rearfender', 'Quarter-panel']
+        tailgate = ['Trunklid', 'Trunk']
+        door_mirror = ['Front-window']
+        side_mirror = ['Sidemirror', 'Mirror']
+
+        if prediction['class'] in bonnet:
+            prediction['class'] = 'BONNET'
+
+        if prediction['class'] in windscreen:
+            prediction['class'] = 'WINDSCREEN' 
+
+        if prediction['class'] in front_bumper:
+            prediction['class'] = 'FRONT BUMPER'
+
+        if prediction['class'] in head_light:
+            prediction['class'] = 'L/F HEAD LIGHT' 
+
+        if prediction['class'] in rear_bumper:
+            prediction['class'] = 'REAR BUMPER'
+
+        if prediction['class'] in rear_light:
+            prediction['class'] = 'L/R Tail light' 
+
+        if prediction['class'] in rear_windscreen:
+            prediction['class'] = 'REAR WINDSCREEN'
+
+        if prediction['class'] in front_door:
+            prediction['class'] = 'DOOR LEFT FRONT' 
+
+        if prediction['class'] in rear_door:
+            prediction['class'] = 'DOOR LEFT REAR'
+
+        if prediction['class'] in front_fender:
+            prediction['class'] = 'L/F FENDER' 
+
+        if prediction['class'] in rear_fender:
+            prediction['class'] = 'FENDER LEFT REAR'
+
+        if prediction['class'] in tailgate:
+            prediction['class'] = 'TAIL GATE' 
+
+        if prediction['class'] in door_mirror:
+            prediction['class'] = 'DOOR MIRROR GLASS RIGHT FRONT'
+
+        if prediction['class'] in side_mirror:
+            prediction['class'] = 'L/SidE MIRROR GLASS'        
+
+        return prediction['class']
+
+
     # Combine the predictions from all models and remove overlapping predictions
     non_overlapping_predictions = []
     for prediction in combined_predictions:
