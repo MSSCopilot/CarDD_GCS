@@ -124,7 +124,8 @@ def run_models_parallel(image_path, confidence=20, file_name='prediction.jpg',mo
     img = annotate_model_colors(img, outputs, model_names)
     cv2.imwrite("predictions_part\\no_check\\" + file_name, img)
 
-    def standard_names():
+    def standard_names(prediction):
+
         bonnet = ['bonnet', 'hood', 'Hood']
         windscreen = ['front_glass', 'Windshield', 'Windshield']
         front_bumper = ['front_bumper', 'Frontbumper', 'Front-bumper']
@@ -210,12 +211,15 @@ def run_models_parallel(image_path, confidence=20, file_name='prediction.jpg',mo
             print(f"adding {prediction['class'] } as no overlap")
             non_overlapping_predictions.append(prediction)
 
+
     combined_output = {'predictions': non_overlapping_predictions}
+    for output in combined_output['predictions']:
+        output['class']=standard_names(output)
+    print(combined_output)
     annotated_image = draw_annotations(image_path, combined_output)
     return annotated_image, time_taken_models, combined_output
 
 def run_model(image_path, confidence, model_name):
-    rf = Roboflow(api_key="ETNCflOTQ7YT4rJu89R9")
     project = rf.workspace().project(model_name)
     model = project.version(1).model
 
