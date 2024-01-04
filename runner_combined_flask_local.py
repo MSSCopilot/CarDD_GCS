@@ -44,8 +44,8 @@ def annotate_image():
     print(f"RUNNING MODELS FOR {file_name}")
 
     # Send HTTP requests to the servers in parallel
-    part_url = 'https://carpart-5a4aan2gca-el.a.run.app/annotate'
-    damage_url = 'https://cardamage-5a4aan2gca-el.a.run.app/annotate'
+    part_url = 'http://127.0.0.1:8080/annotate'
+    damage_url = 'http://127.0.0.1:5000/annotate'
 
     headers = {'content-type': 'application/json'}
     data = json.dumps([base64_image])

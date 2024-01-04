@@ -17,7 +17,7 @@ NEON_COLOURS = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 2
 
 
 
-def upload_blob(bucket_name='car_combined_results', source_file_name='prediction.jpg', destination_blob_name='prediction.jpg'):
+def upload_blob(bucket_name='car_combined_results', source_file_name='prediction.jpg', destination_blob_name='prediction_damage.jpg'):
     """Uploads a file to the bucket."""
     # The ID of your GCS bucket
     # bucket_name = "your-bucket-name"
@@ -153,7 +153,7 @@ def run_models_parallel(image_path, confidence=30, file_name='prediction.jpg',mo
     return annotated_image, time_taken_models, combined_output
 
 def run_model(image_path, confidence, model_name):
-    rf = Roboflow(api_key="ETNCflOTQ7YT4rJu89R9")
+    rf = Roboflow(api_key="mQMgcPnrQmBsKM3lOZiX")
     project = rf.workspace().project(model_name)
     model = project.version(1).model
     if model_name == 'damage-type-nogzj':
@@ -241,6 +241,7 @@ def draw_annotations(image_path, predictions):
         cv2.putText(image, class_name+" "+ str(confidence) ,(int(text_x), int(text_y)), font, font_scale, color, font_thickness)
 
     return image
+
 # pylint: disable=C0103
 app = Flask(__name__)
 @app.route('/annotate', methods=['POST'])
@@ -272,7 +273,9 @@ def annotate_image():
     media_link = upload_blob(source_file_name=output_location)
     time_end=time.time()
     time_taken=time_end-time_start
-    return jsonify({'media_link': media_link, 'total_time_taken': time_taken, 'time_taken_models': time_taken_models, 'Damage List with points': combined_outputs})
+
+    
+    return jsonify({'damage_media_link': media_link, 'total_time_taken': time_taken, 'time_taken_models': time_taken_models, 'damage_predictions': combined_outputs})
 
 if __name__ == '__main__':
     server_port = os.environ.get('PORT', '5000')

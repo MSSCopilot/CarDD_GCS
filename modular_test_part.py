@@ -18,7 +18,7 @@ NEON_COLOURS = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 2
 
 
 
-def upload_blob(bucket_name='car_combined_results', source_file_name='prediction.jpg', destination_blob_name='prediction.jpg'):
+def upload_blob(bucket_name='car_combined_results', source_file_name='prediction.jpg', destination_blob_name='prediction_part.jpg'):
     """Uploads a file to the bucket."""
     # The ID of your GCS bucket
     # bucket_name = "your-bucket-name"
@@ -124,7 +124,7 @@ def run_models_parallel(image_path, confidence=20, file_name='prediction.jpg',mo
     img = annotate_model_colors(img, outputs, model_names)
     cv2.imwrite("predictions_part\\no_check\\" + file_name, img)
 
-    def standard_names():
+    def standard_names(prediction):
         bonnet = ['bonnet', 'hood', 'Hood']
         windscreen = ['front_glass', 'Windshield', 'Windshield']
         front_bumper = ['front_bumper', 'Frontbumper', 'Front-bumper']
@@ -210,12 +210,14 @@ def run_models_parallel(image_path, confidence=20, file_name='prediction.jpg',mo
             print(f"adding {prediction['class'] } as no overlap")
             non_overlapping_predictions.append(prediction)
 
+    for prediction in non_overlapping_predictions:
+        prediction['class'] = standard_names(prediction)
     combined_output = {'predictions': non_overlapping_predictions}
     annotated_image = draw_annotations(image_path, combined_output)
     return annotated_image, time_taken_models, combined_output
 
 def run_model(image_path, confidence, model_name):
-    rf = Roboflow(api_key="ETNCflOTQ7YT4rJu89R9")
+    rf = Roboflow(api_key="mQMgcPnrQmBsKM3lOZiX")
     project = rf.workspace().project(model_name)
     model = project.version(1).model
 
@@ -331,7 +333,9 @@ def annotate_image():
     time_end=time.time()
     time_taken=time_end-time_start
 
-    return jsonify({'media_link': media_link, 'total_time_taken': time_taken, 'time_taken_models': time_taken_models, 'Parts List with points': combined_outputs})
+
+    
+    return jsonify({'parts_media_link': media_link, 'total_time_taken': time_taken, 'time_taken_models': time_taken_models,'part_predictions': combined_outputs})
 
 if __name__ == '__main__':
     server_port = os.environ.get('PORT', '8080')
