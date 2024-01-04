@@ -213,6 +213,9 @@ def run_models_parallel(image_path, confidence=20, file_name='prediction.jpg',mo
     for prediction in non_overlapping_predictions:
         prediction['class'] = standard_names(prediction)
     combined_output = {'predictions': non_overlapping_predictions}
+    for output in combined_output['predictions']:
+        output['class']=standard_names(output)
+    print(combined_output)
     annotated_image = draw_annotations(image_path, combined_output)
     return annotated_image, time_taken_models, combined_output
 
